@@ -10,7 +10,7 @@ root = tk.Tk()
 root.title("Seguimiento de Gastos!")
 
 #agregar estilo
-root.tk.call('source', 'Forest-ttk-theme/forest-dark.tcl')
+root.tk.call('source', 'forest-dark.tcl')
 ttk.Style().theme_use('forest-dark')
 
 #Hacer la app responsiva
