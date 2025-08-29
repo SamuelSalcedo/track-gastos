@@ -32,16 +32,32 @@ widgets_frame.columnconfigure(index=0, weight=1)
 
 
 #lista de las categorias a elegir
+#categorias del treeview (item_id)
+#1 = comida
+#2 = Gastos
+#3 = Transporte
+#4 = Ocio
+#5 = Hormiga
 combo_list = ["Comida", "Gastos", "Transporte", "Ocio", 'Gasto Hormiga']
 
-#tamanio y caracteristicas de la ventana
-root.geometry("1000x650")
+#tamanio la ventana
+root.geometry("850x500")
 
-#lista pricnipal para el seguimiento de costos
-gastos = []
+#lista de tuplas se modifica a la siguiente estructura para que sea treeview
+#(padre, indice, item_id, texto,   valores)
+#("",   "end",     1,   "parent, ("item 1", "Valor 1")")
+#los siguientes elementos usan el 1 como padre
+
+gastos_tree = [
+    ("", "end", 1, "Comida",("","Descripcion", "Cantidad")),
+    ("", "end", 2, "Gastos",("","Descripcion", "Cantidad")),
+    ("", "end", 3, "Transporte",("","Descripcion", "Cantidad")),
+    ("", "end", 4, "Ocio",("","Descripcion", "Cantidad")),
+    ("", "end", 5, "Gasto Hormiga",("","Descripcion", "Cantidad")), 
+          ]
 #cada gasto esta formado por una descripcion, categoria y cantidad 
 
-#funcion para agregar nuevos gastos
+
 
 def agregar_gastos():
     
@@ -49,6 +65,9 @@ def agregar_gastos():
     cat = categoria.get()
     cant = cantidad.get()
     
+    print(desc)
+    print(cat)
+    print(cant)
     #Valida que todos los campos esten
     if not desc or not cat or not cant:
         messagebox.showerror("Error de campos","Debe de completar todos los campos")
@@ -62,62 +81,35 @@ def agregar_gastos():
         return
     
     #Agrega la lista de los gastos como una tupla
-    gastos.append((desc,cat,cant))
-    
-    #Funciones helper para actualizar la tabla y el total
-    actualiza_gastos()
-    actualiza_total()
+    #gastos_tree.append((desc,cat,cant))
     
     descripcion.delete(0, tk.END)
     categoria.delete(0, tk.END)
     cantidad.delete(0, tk.END)
 
-def actualiza_gastos():
-    #borra la fila anterior
-    for fila in treeview.get_children():
-        treeview.delete(fila)
-        
-    #Agrega el nuevo gasto a la tabla
-    for i,(desc, cat, cant) in enumerate(gastos, start=1):
-        treeview.insert("", "end", values = (i, desc,cat, f"${cant:.2f}"))
-    
-    
-def actualiza_total():
-        print("Nuevo gasto")
-        #solo toma el campo de esta tupla
-        total = sum(cant for _, _, cant in gastos)
-        total_resultado.config(text=f"Total: ${total:.2f}")
 
-    
-#hace run placeholder que se borra cuando el usuario haga clik
+input_frame = ttk.LabelFrame(root, text="Rellena los campos", padding=(20, 10))
+input_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew")
 
-def on_focus_in(event):
-    if descripcion.get() == placeholder:
-            descripcion.delete(0, tk.END)
+descripcion = ttk.Entry(input_frame)
+descripcion.insert(0, " ")
+descripcion.grid(row=0, column=0, padx=3, pady=(0, 15), sticky="ew")
 
-def on_focus_out(event):
-    if not descripcion.get():
-        descripcion.insert(0, placeholder)
-
-placeholder = 'Descripcion'
-descripcion = ttk.Entry(widgets_frame, )
-descripcion.insert(0, placeholder)
-descripcion.grid(row=0, column=0, padx=5, pady=(0, 10), sticky="ew")
-
-descripcion.bind("<FocusIn>", on_focus_in)
-descripcion.bind("<FocusOut>", on_focus_out) 
-
-categoria = ttk.Combobox(widgets_frame, values=combo_list)
+categoria = ttk.Combobox(input_frame, values=combo_list)
 categoria.current(0)
 categoria.grid(row=1, column=0, padx=5, pady=10,  sticky="ew")
 
-cantidad = ttk.Entry(widgets_frame)
-cantidad.insert(0, "cantidad")
-cantidad.grid(row=2, column=0, padx=5, pady=(0, 10), sticky="ew")
+cantidad = ttk.Entry(input_frame)
+cantidad.insert(0, "0.0")
+cantidad.grid(row=2, column=0, padx=5, pady=(0, 15), sticky="ew")
 
+# Separator
+separator = ttk.Separator(root)
+separator.grid(row=2, column=0, padx=(20, 10), pady=10, sticky="ew")
 
-agregar_btn = ttk.Button(widgets_frame, text="Agregar")
-agregar_btn.grid(row=3, column=0, padx=5, pady=10, sticky="nsew")
+agregar_btn = ttk.Button(input_frame, text="Agregar", command=agregar_gastos)
+agregar_btn.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
+
 
 #agregar_btn = tk.Button(root, text="Agregar Gastos", command=agregar_gastos, bg="#4CAF50", fg="white")
 #agregar_btn.pack(pady=10)
@@ -147,32 +139,25 @@ treeview.pack(expand=True, fill="both")
 treeScroll.config(command=treeview.yview)
 
 #agregar columnas
-treeview.column("#0", width=50)
-treeview.column(1, anchor="w", width=120)
+treeview.column("#0",anchor="w", width=120)
+treeview.column(1, width=50)
 treeview.column(2, anchor="w", width=120)
 treeview.column(3, anchor="w", width=120)
 treeview.column(4, anchor="w", width=120)
 
 #titulos de las columnas
-treeview.heading("#0", text="#", anchor="center")
-treeview.heading(1, text="Categoria", anchor="center")
+treeview.heading("#0", text="Categoria", anchor="center")
+treeview.heading(1, text="#", anchor="center")
 treeview.heading(2, text="Descripcion", anchor="center")
 treeview.heading(3, text="Cantidad", anchor="center")
 treeview.heading(4, text="Total", anchor="center")
 
+#mostrar de forma predeterminada el contenido del tree vacio
+for item in gastos_tree:
+    treeview.insert(parent=item[0], index=item[1], iid=item[2], text=item[3], values=item[4])
+    if item[0] == "" or item[2] in (8, 12):
+       treeview.item(item[2], open=True) # Open parents
 
-#Rellenar la tabla
-#for col in columna:
- #   tree.heading(col, text=col)
-#tree.pack(pady=10, fill="x")
-# Insert treeview data
-#for item in treeview:
- #   treeview.insert(parent=item[0], index=item[1], iid=item[2], text=item[3], values=item[4])
-#treeview.pack();
-
-# Select and scroll
-#treeview.selection_set(10)
-#treeview.see(7)
 
 
     #muestra la cantidad total de los gastos
