@@ -164,6 +164,29 @@ def agregar_gastos():
     descripcion.delete(0, tk.END)
     cantidad.delete(0, tk.END)
     
+        
+    #AUN NO PERSISTEN 
+def guardar_datos():
+    with open("gastos.json", "w") as f:
+        json.dump(treeview, f)
+        
+def cargar_datos():
+    try:
+        with open("gastos.json", "r") as f:
+            gastos_tree =json.load(f)
+            return gastos_tree
+    
+    except FileNotFoundError:
+        messagebox.showerror("Error de archivo","No existen registros")
+        return []  # si no existe, empieza vacío
+    
+guardar_btn = ttk.Button(input_frame, text="Guardar datos", command=guardar_datos)
+guardar_btn.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
+
+#cargar_btn = ttk.Button(input_frame, text="Abrir ultimo registro", command= cargar_datos)
+#cargar_btn.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
+
+
 agregar_btn = ttk.Button(input_frame, text="Agregar", command=agregar_gastos)
 agregar_btn.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
 #Este en loop la ventana
