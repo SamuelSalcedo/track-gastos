@@ -14,22 +14,22 @@ root.title("Seguimiento de Gastos!")
 #agregar estilo
 root.tk.call('source', 'forest-dark.tcl')
 ttk.Style().theme_use('forest-dark')
+root.option_add("*tearOff", False) # This is always a good idea
 
 #Hacer la app responsiva
+
+# Make the app responsive
 root.columnconfigure(index=0, weight=1)
 root.columnconfigure(index=1, weight=1)
 root.columnconfigure(index=2, weight=1)
-root.columnconfigure(index=3, weight=1)
-
 root.rowconfigure(index=0, weight=1)
 root.rowconfigure(index=1, weight=1)
 root.rowconfigure(index=2, weight=1)
-root.rowconfigure(index=3, weight=1)
 
 
 # Create a Frame for input widgets
-widgets_frame = ttk.Frame(root, padding=(0, 0, 0, 10))
-widgets_frame.grid(row=0, column=1, padx=10, pady=(30, 10), sticky="nsew", rowspan=4)
+widgets_frame = ttk.Frame(root, padding=(0, 0, 0, 15))
+widgets_frame.grid(row=0, column=1, padx=20, pady=(20, 10), sticky="nsew", rowspan=4)
 widgets_frame.columnconfigure(index=0, weight=1)
 
 
@@ -62,21 +62,16 @@ input_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew")
 
 descripcion = ttk.Entry(input_frame)
 descripcion.insert(0, " ")
-descripcion.grid(row=0, column=0, padx=3, pady=(0, 15), sticky="w")
+descripcion.grid(row=0, column=0, padx=5, pady=15, sticky="w")
 
 categoria = ttk.Combobox(input_frame, values=combo_list)
 categoria.current(0)
-categoria.grid(row=1, column=0, padx=5, pady=10,  sticky="w")
+categoria.grid(row=1, column=0, padx=(10,15), pady=5, sticky="e")
 categoria.set("Comida")
 
 cantidad = ttk.Entry(input_frame)
 cantidad.insert(0, "0.0")
-cantidad.grid(row=2, column=0, padx=5, pady=(0, 15), sticky="w")
-
-# Separator
-separator = ttk.Separator(root)
-separator.grid(row=3, column=0, padx=(20, 10), pady=10, sticky="w")
-
+cantidad.grid(row=2, column=0, padx=5, pady=15, sticky="w")
 
 
 # Panedwindow
@@ -96,23 +91,33 @@ treeScroll = ttk.Scrollbar(treeFrame)
 treeScroll.pack(side="right", fill="y")
 
 #crear marco de la tabla
-treeview = ttk.Treeview(treeFrame, selectmode="extended", yscrollcommand=treeScroll.set, columns=(1, 2, 3,4), height=15)
+treeview = ttk.Treeview(treeFrame, selectmode="extended", yscrollcommand=treeScroll.set, columns=("#","Categoria","Descipcion","Cantidad"), height=15)
 treeview.pack(expand=True, fill="both")
 treeScroll.config(command=treeview.yview)
+#Diccionario para guardar el total de cada categoria
+total_categoria = {}
+
+#Agregar categorias padre
+treeview.insert("", "end", iid="Comida", text="Comida")
+treeview.insert("", "end", iid="Gastos", text="Gastos")
+treeview.insert("", "end", iid="Ocio", text="Ocio")
+treeview.insert("", "end", iid="Transporte", text="Transporte")
+treeview.insert("", "end", iid="Gasto Hormiga", text="Gasto Hormiga")
+
 
 #agregar columnas
-treeview.column("#0",anchor="w", width=120)
-treeview.column(1, width=50)
-treeview.column(2, anchor="w", width=120)
-treeview.column(3, anchor="w", width=120)
-treeview.column(4, anchor="w", width=120)
+treeview.column("#0", anchor="w", width=150)
+treeview.column(0, anchor="w", width=10)
+treeview.column(1, anchor="w", width=150)
+treeview.column(2, anchor="w", width=70)
+treeview.column(3, anchor="w", width=50)
 
 #titulos de las columnas
 treeview.heading("#0", text="Categoria", anchor="center")
-treeview.heading(1, text="#", anchor="center")
-treeview.heading(2, text="Descripcion", anchor="center")
-treeview.heading(3, text="Cantidad", anchor="center")
-treeview.heading(4, text= "Total", anchor="center")
+treeview.heading(0, text="#", anchor="center")
+treeview.heading(1, text="Descripcion", anchor="center")
+treeview.heading(2, text="Cantidad", anchor="center")
+treeview.heading(3, text="Total", anchor="center")
 
 
 contador = 0
@@ -142,19 +147,27 @@ def agregar_gastos():
         
         if cat:
             total += cant
+            #agregar al diccionario
             gastos_tree[cat].append((contador,desc,cant))
-            for item in gastos_tree:
-                treeview.insert("", "end", values=(contador, desc, cant))
-                #insertar en el treeview los datos de la lista mas simple
-                treeview.insert("", "end", values=("", "", "", total))
+            #agregar a la tabla
+            treeview.insert(cat, "end", values=(contador, desc, cant))
+            #ir sumando el valor de la cantidad solo cuando coincide la categoria
+    #        total = sum(item[2] for item in gastos_tree[cat])
+            #total_categoria[cate] = treeview.insert(cate,"end", values=("","","Total:",total))
+   #         treeview.item(total_categoria[cat], values=("","","Total:",total))
             
         else:
             messagebox.showerror("Error de campos", "Debe de estar en una categoria")
             return
     descripcion.delete(0, tk.END)
     cantidad.delete(0, tk.END)
-    
 
+
+"""for cate in gastos_tree.keys():
+    treeview.insert("", "end", iid=cate, text=cate.capitalize())
+    #agregar un total por cada categoria
+    total_categoria[cate] = treeview.insert(cate,"end", values=("","","Total:",0))
+"""
 #AUN NO PERSISTEN 
 def guardar_datos():
     with open("gastos.json", "w") as f:
@@ -179,5 +192,17 @@ guardar_btn.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
 
 agregar_btn = ttk.Button(input_frame, text="Agregar", command=agregar_gastos)
 agregar_btn.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
+
+# Sizegrip
+sizegrip = ttk.Sizegrip(root)
+sizegrip.grid(row=100, column=100, padx=(0, 5), pady=(0, 5))
+
+#Hacer que aparezca en el centro
+root.update()
+root.minsize(root.winfo_width(), root.winfo_height())
+x_cordinate = int((root.winfo_screenwidth()/4) - (root.winfo_width()/3))
+y_cordinate = int((root.winfo_screenheight()/3) - (root.winfo_height()/4))
+root.geometry("+{}+{}".format(x_cordinate, y_cordinate))
+
 #Este en loop la ventana
 root.mainloop()
