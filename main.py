@@ -45,18 +45,14 @@ combo_list = ["Comida", "Gastos", "Transporte", "Ocio", 'Gasto Hormiga']
 #tamanio la ventana
 root.geometry("850x500")
 
-#lista de tuplas se modifica a la siguiente estructura para que sea treeview
-#(padre, indice, item_id, texto,   valores)
-#("",   "end",     1,   "parent, ("item 1", "Valor 1")")
-#los siguientes elementos usan el 1 como padre
-
-gastos_tree = [
-    ("", "end", 1, "Comida"),
-    ("", "end", 2, "Gastos"),
-    ("", "end", 3, "Transporte"),
-    ("", "end", 4, "Ocio"),
-    ("", "end", 5, "Gasto Hormiga"), 
-]
+#menos complejo para poder usar bien el json (tmabien yo que no lo entendia)
+gastos_tree = {
+    "Comida":[],
+    "Gastos":[],
+    "Transporte":[],
+    "Ocio":[],
+    "Gasto Hormiga":[] 
+}
 
 #cada gasto esta formado por una descripcion, categoria y cantidad 
 total =0
@@ -71,7 +67,7 @@ descripcion.grid(row=0, column=0, padx=3, pady=(0, 15), sticky="w")
 categoria = ttk.Combobox(input_frame, values=combo_list)
 categoria.current(0)
 categoria.grid(row=1, column=0, padx=5, pady=10,  sticky="w")
-categoria.set("comida")
+categoria.set("Comida")
 
 cantidad = ttk.Entry(input_frame)
 cantidad.insert(0, "0.0")
@@ -79,7 +75,7 @@ cantidad.grid(row=2, column=0, padx=5, pady=(0, 15), sticky="w")
 
 # Separator
 separator = ttk.Separator(root)
-separator.grid(row=2, column=0, padx=(20, 10), pady=10, sticky="w")
+separator.grid(row=3, column=0, padx=(20, 10), pady=10, sticky="w")
 
 
 
@@ -118,30 +114,17 @@ treeview.heading(2, text="Descripcion", anchor="center")
 treeview.heading(3, text="Cantidad", anchor="center")
 treeview.heading(4, text= "Total", anchor="center")
 
-#exportar a excel la lista con el total 
-for item in gastos_tree:
-    treeview.insert(parent=item[0], index=item[1], iid=item[2], text=item[3])
-    if item[0] == "" or item[2] in (8, 12):
-        treeview.item(item[2], open=True) # Open parents
 
-treeview.insert("", "end", values=("", "", "", total))
-        
 contador = 0
 def agregar_gastos():
     #index para cada uno de los gastos
-    gastos ={
-        "comida" : 1,
-        "Gastos" : 2,
-        "Transporte":3,
-        "Ocio":4,
-        "Gasto Hormiga":5
-    }
+
     global contador
     global total
-    desc = descripcion.get()
+    desc= descripcion.get()
     cat = categoria.get()
     cant = cantidad.get()
-    id_padre = gastos.get(cat)
+        
     #Valida que todos los campos esten
 
     if not desc or not cat or not cant:
@@ -157,18 +140,25 @@ def agregar_gastos():
             return
         contador += 1
         
-        if id_padre:
+        if cat:
             total += cant
-            treeview.insert(id_padre, "end", values=(contador,desc, cant, total))
-    
+            gastos_tree[cat].append((contador,desc,cant))
+            for item in gastos_tree:
+                treeview.insert("", "end", values=(contador, desc, cant))
+                #insertar en el treeview los datos de la lista mas simple
+                treeview.insert("", "end", values=("", "", "", total))
+            
+        else:
+            messagebox.showerror("Error de campos", "Debe de estar en una categoria")
+            return
     descripcion.delete(0, tk.END)
     cantidad.delete(0, tk.END)
     
-        
-    #AUN NO PERSISTEN 
+
+#AUN NO PERSISTEN 
 def guardar_datos():
     with open("gastos.json", "w") as f:
-        json.dump(treeview, f)
+        json.dump(gastos_tree, f)
         
 def cargar_datos():
     try:
