@@ -96,13 +96,11 @@ treeview.pack(expand=True, fill="both")
 treeScroll.config(command=treeview.yview)
 #Diccionario para guardar el total de cada categoria
 total_categoria = {}
-
-#Agregar categorias padre
-treeview.insert("", "end", iid="Comida", text="Comida")
-treeview.insert("", "end", iid="Gastos", text="Gastos")
-treeview.insert("", "end", iid="Ocio", text="Ocio")
-treeview.insert("", "end", iid="Transporte", text="Transporte")
-treeview.insert("", "end", iid="Gasto Hormiga", text="Gasto Hormiga")
+#mejorando logica de categorias
+for cate in gastos_tree.keys():
+    treeview.insert("", "end", iid=cate, text=cate.capitalize())
+    #agregar un total por cada categoria
+    total_categoria[cate] = treeview.insert(cate,"end", values=("","","Total:",0))
 
 
 #agregar columnas
@@ -152,9 +150,9 @@ def agregar_gastos():
             #agregar a la tabla
             treeview.insert(cat, "end", values=(contador, desc, cant))
             #ir sumando el valor de la cantidad solo cuando coincide la categoria
-    #        total = sum(item[2] for item in gastos_tree[cat])
+            total = sum(item[2] for item in gastos_tree[cat])
             #total_categoria[cate] = treeview.insert(cate,"end", values=("","","Total:",total))
-   #         treeview.item(total_categoria[cat], values=("","","Total:",total))
+            treeview.item(total_categoria[cat], values=("","","Total:",total))
             
         else:
             messagebox.showerror("Error de campos", "Debe de estar en una categoria")
@@ -163,11 +161,7 @@ def agregar_gastos():
     cantidad.delete(0, tk.END)
 
 
-"""for cate in gastos_tree.keys():
-    treeview.insert("", "end", iid=cate, text=cate.capitalize())
-    #agregar un total por cada categoria
-    total_categoria[cate] = treeview.insert(cate,"end", values=("","","Total:",0))
-"""
+
 #AUN NO PERSISTEN 
 def guardar_datos():
     with open("gastos.json", "w") as f:
