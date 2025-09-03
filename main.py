@@ -157,33 +157,41 @@ def agregar_gastos():
     cantidad.delete(0, tk.END)
     return total
 
-#AUN NO PERSISTEN 
+#guardar los datos en un json basico 
 def guardar_datos():
     with open("gastos.json", "w") as f:
         json.dump(gastos_tree, f)
+        messagebox.showinfo("Datos Guardados","Los datos han sido Guardados exitosamente")
+
         
+        
+#tomar los ultimos gastos del json y subirlos al diccionario
 def cargar_datos():
+    global total
     try:
         with open("gastos.json", "r") as f:
+            messagebox.showinfo("Datos cargados","Los datos han sido cargados exitosamente")
             gastos_tree =json.load(f)
-            return gastos_tree
+            for cate, items in gastos_tree.items():
+                
+                #insertar hijos
+                for num, des, cant in items:
+                    total += cant
+                    treeview.insert(cate,"end",values=(num,des,cant))
+                    
+                    treeview.item("Total", values=("","","Total:", total))
+
+            print(gastos_tree)
     
     except FileNotFoundError:
         messagebox.showerror("Error de archivo","No existen registros")
-        return []  # si no existe, empieza vacío
-    
-
-        
-#agregar una fila solo para ver el total de los gastos
-#treeview.insert("", "end", iid="Total", text="Total", open=True)
-#treeview.insert("Total","end", values=("","","Total:",total))
-
+        return []  # si no existe, empieza vacío     
 
 guardar_btn = ttk.Button(input_frame, text="Guardar datos", command=guardar_datos)
 guardar_btn.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
 
-#cargar_btn = ttk.Button(input_frame, text="Abrir ultimo registro", command= cargar_datos)
-#cargar_btn.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
+cargar_btn = ttk.Button(input_frame, text="Abrir ultimo registro", command= cargar_datos)
+cargar_btn.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
 
 agregar_btn = ttk.Button(input_frame, text="Agregar", command=agregar_gastos)
 agregar_btn.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
