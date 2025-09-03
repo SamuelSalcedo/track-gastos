@@ -51,12 +51,10 @@ gastos_tree = {
     "Gastos":[],
     "Transporte":[],
     "Ocio":[],
-    "Gasto Hormiga":[] 
+    "Gasto Hormiga":[]
 }
 
 #cada gasto esta formado por una descripcion, categoria y cantidad 
-total =0
-
 input_frame = ttk.LabelFrame(root, text="Rellena los campos", padding=(20, 10))
 input_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew")
 
@@ -94,14 +92,6 @@ treeScroll.pack(side="right", fill="y")
 treeview = ttk.Treeview(treeFrame, selectmode="extended", yscrollcommand=treeScroll.set, columns=("#","Categoria","Descipcion","Cantidad"), height=15)
 treeview.pack(expand=True, fill="both")
 treeScroll.config(command=treeview.yview)
-#Diccionario para guardar el total de cada categoria
-total_categoria = {}
-#mejorando logica de categorias
-for cate in gastos_tree.keys():
-    treeview.insert("", "end", iid=cate, text=cate.capitalize())
-    #agregar un total por cada categoria
-    total_categoria[cate] = treeview.insert(cate,"end", values=("","","Total:",0))
-
 
 #agregar columnas
 treeview.column("#0", anchor="w", width=150)
@@ -117,7 +107,14 @@ treeview.heading(1, text="Descripcion", anchor="center")
 treeview.heading(2, text="Cantidad", anchor="center")
 treeview.heading(3, text="Total", anchor="center")
 
-
+#mejorando logica de categorias
+for cate in gastos_tree.keys():
+    treeview.insert("", "end", iid=cate, text=cate.capitalize(), open=True)
+    #agregar un total por cada categoria
+treeview.insert("","end", iid="Total", text="Total", open=True)
+    
+    
+total = 0
 contador = 0
 def agregar_gastos():
     #index para cada uno de los gastos
@@ -150,17 +147,15 @@ def agregar_gastos():
             #agregar a la tabla
             treeview.insert(cat, "end", values=(contador, desc, cant))
             #ir sumando el valor de la cantidad solo cuando coincide la categoria
-            total = sum(item[2] for item in gastos_tree[cat])
-            #total_categoria[cate] = treeview.insert(cate,"end", values=("","","Total:",total))
-            treeview.item(total_categoria[cat], values=("","","Total:",total))
+            #total = sum(item[2] for item in gastos_tree[cat])    
             
+            treeview.item("Total", values=("","","Total:", total))
         else:
             messagebox.showerror("Error de campos", "Debe de estar en una categoria")
             return
     descripcion.delete(0, tk.END)
     cantidad.delete(0, tk.END)
-
-
+    return total
 
 #AUN NO PERSISTEN 
 def guardar_datos():
@@ -177,12 +172,18 @@ def cargar_datos():
         messagebox.showerror("Error de archivo","No existen registros")
         return []  # si no existe, empieza vacío
     
+
+        
+#agregar una fila solo para ver el total de los gastos
+#treeview.insert("", "end", iid="Total", text="Total", open=True)
+#treeview.insert("Total","end", values=("","","Total:",total))
+
+
 guardar_btn = ttk.Button(input_frame, text="Guardar datos", command=guardar_datos)
 guardar_btn.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
 
 #cargar_btn = ttk.Button(input_frame, text="Abrir ultimo registro", command= cargar_datos)
 #cargar_btn.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
-
 
 agregar_btn = ttk.Button(input_frame, text="Agregar", command=agregar_gastos)
 agregar_btn.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
