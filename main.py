@@ -3,6 +3,8 @@
 import tkinter as tk
 import json
 
+import pandas as pd
+
 #ttk  = treeview widget para ver la informacion en una tabla
 #messagebox es apra mostrar mensajes pop-up
 from tkinter import ttk, messagebox
@@ -168,6 +170,7 @@ def guardar_datos():
 #tomar los ultimos gastos del json y subirlos al diccionario
 def cargar_datos():
     global total
+    global gastos_tree
     try:
         with open("gastos.json", "r") as f:
             messagebox.showinfo("Datos cargados","Los datos han sido cargados exitosamente")
@@ -187,6 +190,24 @@ def cargar_datos():
         messagebox.showerror("Error de archivo","No existen registros")
         return []  # si no existe, empieza vacío     
 
+#exportar a excel el json
+def exportar_excel():
+    print(gastos_tree)
+    #converir datos de la lista a filas
+    filas = []
+    for categoria, items in gastos_tree.items():
+        for num, desc, cant in items:
+            filas.append({
+                "Categoria": categoria,
+                "Numero": num,
+                "Descripcion": desc,
+                "Cantidad": cant
+            })
+
+    df = pd.DataFrame(filas)
+    df.to_excel('gastos.xlsx', index=False)    
+    print("Datos exportados a gastos.csv")
+
 guardar_btn = ttk.Button(input_frame, text="Guardar datos", command=guardar_datos)
 guardar_btn.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
 
@@ -195,6 +216,10 @@ cargar_btn.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
 
 agregar_btn = ttk.Button(input_frame, text="Agregar", command=agregar_gastos)
 agregar_btn.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
+
+
+excel_btn = ttk.Button(input_frame, text="exportar a excel", command=exportar_excel)
+excel_btn.grid(row=7, column=0, padx=5, pady=10, sticky="nsew")
 
 # Sizegrip
 sizegrip = ttk.Sizegrip(root)
