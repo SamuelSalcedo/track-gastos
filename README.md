@@ -10,13 +10,23 @@ Esta aplicaicon es realmente simple asi que decidi hacer las siguientes modifica
 
 - Persistencia de los datos
 - Agregar categorias fijas para el tipo de gastos
-- Agregar ingresos 
-- Agregar fecha de cuando se realizo el gasto
 - Exportar a excel los gastos y datos realizados 
 
 # Mejora de apariencia 
 Use la apariencia de [Forest-ttk-theme](https://github.com/rdbende/Forest-ttk-theme) de rdbende 
 
+- Esta es la aparariencia del proyecto original
+#
+<p align="center">
+
+  <img src="image.png" alt="Version original de la aplicacion" width="750" height="360">
+</p>
+
+- Asi es como se ve este proyecto final
+#
+<p align="center">
+  <img src="image-1.png" alt="Version original de la aplicacion" width="700" height="400">
+</p>
 
 ## Creditos
 Este proyecto originalmente extraido de la pagina Code With curious el proyecto expense tracer in python using GUI
@@ -31,6 +41,17 @@ Para correr este proyecto ingresa el siguiente comando
 
 ```bash
   python main.py
+```
+
+Algunas dependencias extra que use en este proyecto fue pandas y por lo tanto openpyxl
+las cuales se pueden instalar por los siguientes comandos:
+
+```bash
+  python -m pip install openpyxl
+```
+
+```bash
+  python -m pip install pandas
 ```
 
 ## 🔗 Links
